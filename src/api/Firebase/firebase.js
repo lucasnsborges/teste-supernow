@@ -76,7 +76,65 @@ const Firebase = {
     return query.once("child_added", (snapshot) => {
       snapshot.ref.update(data)
     });
-  }
+  },
+
+  addFavorite: data => {
+    return firebase
+      .database()
+      .ref("favorites")
+      .push(data);
+  },
+
+  removeFavorite: id => {
+    try {
+      const query = firebase.database().ref("favorites").orderByChild("id").equalTo(id);
+
+      return query.once("child_added", (snapshot) => {
+        snapshot.ref.remove()
+      });
+    } catch(err) {
+      console.log('ERROR: ', err);
+    }
+  },
+
+  getFavorites: async () => {
+    const query = firebase
+      .database()
+      .ref("favorites")
+
+    const snapshot = await query.once("value");
+
+    return toArray(snapshot);
+  },
+
+  createArticle: data => {
+    return firebase
+      .database()
+      .ref("articles")
+      .push(data);
+  },
+
+  getArticles: async () => {
+    const query = firebase
+      .database()
+      .ref("articles")
+
+    const snapshot = await query.once("value");
+
+    return toArray(snapshot);
+  },
+
+  getArticleById: async id => {
+    const query = firebase
+      .database()
+      .ref("articles")
+      .orderByChild("id")
+      .equalTo(id);
+
+    const snapshot = await query.once("value");
+
+    return toArray(snapshot);
+  },
 };
 
 export default Firebase;

@@ -1,27 +1,91 @@
-import React, { Component } from "react";
+import React from "react";
 import { Dimensions, Image, StyleSheet, Text, View } from "react-native";
-import { FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
 import { format, parseISO } from "date-fns";
 
 import TouchableItem from "../../components/TouchableItem";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("screen");
 
-export default class ArticleCard extends Component {
-  render() {
-    let { article } = this.props;
+export default class ArticleCard extends React.Component {
+  state = {
+    favorite: false,
+    read_time: 0
+  };
+
+  componentDidMount() {
+    const { article, favorites } = this.props;
+    const find_favorite = favorites.find(f => f.id === article.id);
     const read_time = Math.floor(Math.random() * (8 - 4 + 1) + 4);
+
+    this.setState({ read_time })
+
+    if (find_favorite) {
+      this.setState({
+        favorite: true,
+      });
+    }
+  }
+
+  handleFavorite = () => {
+    const {
+      article,
+      favorites,
+      handleAddFavorite,
+      handleRemoveFavorite
+    } = this.props;
+
+    const find_favorite = favorites.find(f => f.id === article.id);
+
+    if (find_favorite) {
+      this.setState({
+        favorite: false
+      });
+
+      return handleRemoveFavorite(article.id);
+    }
+
+    this.setState({
+      favorite: true
+    });
+
+    return handleAddFavorite(article);
+  }
+
+  render() {
+    const { article } = this.props;
+
+    if (!article.publishedAt) {
+      return null;
+    }
 
     return (
       <TouchableItem style={styles.card}>
         <View style={styles.cardHeader}>
           <Text style={styles.cardHeaderText} numberOfLines={1}>
-            {format(parseISO(article.publishedAt), "dd MMM")} - {read_time} min
-            read - {article.author}
+            {format(parseISO(article.publishedAt), "dd MMM")} - {this.state.read_time}{" "}
+            min read - {article.author}
           </Text>
-          <View>
-            <FontAwesome5 name="heart" size={20} color={fontColorSecondary} />
-          </View>
+          <TouchableItem
+            rounded style={styles.heartWrapper}
+            onPress={() => this.handleFavorite()}
+          >
+            {
+              this.state.favorite ? (
+                <FontAwesome
+                  name="heart"
+                  size={20}
+                  color="#F68"
+                />
+              ) : (
+                <FontAwesome
+                  name="heart-o"
+                  size={20}
+                  color="#555"
+                />
+              )
+            }
+          </TouchableItem>
         </View>
 
         <View style={styles.articleInfoContainer}>
@@ -89,5 +153,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#EEE",
     resizeMode: "cover",
     height: 128
+  },
+
+  heartWrapper: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center"
   }
 });

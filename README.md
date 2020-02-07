@@ -23,8 +23,8 @@
 - Execute os seguintes comandos para rodar o projeto
     ```bash
       cd testesupnow
-      npm install 
-      npm start   
+      yarn install 
+      yarn start   
     ```
 
 <br /><br />

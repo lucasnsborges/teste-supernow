@@ -6,7 +6,7 @@ import Profile from "../screens/Profile";
 const AppNavigation = createStackNavigator(
   {
     Home: { screen: Home },
-    Profile: { screen: Profile }
+    Profile: { screen: Profile },
   },
   {
     initialRouteName: "Home",

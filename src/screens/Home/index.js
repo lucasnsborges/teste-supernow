@@ -1,6 +1,6 @@
 import axios from "axios";
 import { FontAwesome5 } from "@expo/vector-icons";
-import React, { Component } from "react";
+import React from "react";
 import {
   Animated,
   Dimensions,
@@ -8,10 +8,11 @@ import {
   StyleSheet,
   Text,
   View,
-  Alert
+  TouchableOpacity
 } from "react-native";
 
 import _ from "lodash";
+import uuid from 'uuid';
 
 import { withFirebaseHOC } from "../../api/Firebase";
 import { NavigationEvents } from 'react-navigation';
@@ -29,29 +30,64 @@ const PUBLIC_API_URL =
 
 const { width: SCREEN_WIDTH } = Dimensions.get("screen");
 
-class Home extends Component {
+class Home extends React.Component {
   constructor() {
     super();
 
     this.state = {
       scrollY: new Animated.Value(0),
       articles: [],
+      favorites: [],
       fullname: "",
       profileImage: ""
     };
   }
 
   async componentDidMount() {
-    const { data } = await axios(PUBLIC_API_URL);
+    const { firebase } = this.props;
+    const articles = await firebase.getArticles();
+    const favorites = await firebase.getFavorites();
+
+    this.handleArticles();
 
     this.setState({
-      articles: data.articles
+      articles: articles.reverse(),
+      favorites
     })
+  }
+
+  async handleArticles()  {
+    const { firebase } = this.props;
+    const { data } = await axios(PUBLIC_API_URL);
+
+    const articles = data.articles;
+
+    articles.forEach((article) => {
+      article.id = uuid.v4();
+    });
+
+    const saveNewArticles = articles.map(async (a) => {
+      const all_articles = await firebase.getArticles();
+      const find = all_articles.find(s => s.url === a.url);
+
+      if (!find) {
+        const create = await firebase.createArticle(a);
+
+        return create;
+      }
+    })
+
+    Promise.all(saveNewArticles).then(async () => {
+      const getAllArticles = await firebase.getArticles();
+
+      this.setState({
+        articles: getAllArticles.reverse()
+      })
+    });
   }
 
   async getUserDetails() {
     const { firebase } = this.props;
-
     const user = firebase.currentUser();
     const info = await firebase.getUserInfo(user.uid);
 
@@ -63,6 +99,22 @@ class Home extends Component {
 
   handleNavigateProfile = () => {
     this.props.navigation.navigate("Profile");
+  }
+
+  handleAddFavorite = async (article) => {
+    const { firebase } = this.props;
+    const add = await firebase.addFavorite(article);
+    const favorites = await firebase.getFavorites()
+
+    add && this.setState({ favorites })
+  }
+
+  handleRemoveFavorite = async (id) => {
+    const { firebase } = this.props;
+    const remove = await firebase.removeFavorite(id);
+    const favorites = await firebase.getFavorites()
+
+    remove && this.setState({ favorites })
   }
 
   render() {
@@ -84,7 +136,7 @@ class Home extends Component {
       extrapolate: "clamp"
     });
 
-    const { fullname, profileImage, articles } = this.state;
+    const { fullname, profileImage, articles, favorites } = this.state;
 
     return (
       <View style={styles.container}>
@@ -109,9 +161,9 @@ class Home extends Component {
               <Text style={styles.headerRightText}>{fullname}</Text>
             </Animated.View>
             <TouchableItem
-              onPress={() => this.handleNavigateProfile()}
               rounded
               style={styles.headerRightSide}
+              onPress={() => this.handleNavigateProfile()}
             >
               <FontAwesome5 name="edit" size={22} color="#333" />
             </TouchableItem>
@@ -126,6 +178,13 @@ class Home extends Component {
               source={{ uri: profileImage || PLACEHOLDER_IMAGE }}
             />
             <Text style={styles.usernameText}>{fullname}</Text>
+
+            <TouchableOpacity
+              style={{ marginTop: 16 }}
+              onPress={() => console.log("navigation screen")}
+            >
+              <Text style={styles.textUnderline}>Favoritos: {favorites.length}</Text>
+            </TouchableOpacity>
           </Animated.View>
         </Animated.View>
 
@@ -142,8 +201,14 @@ class Home extends Component {
           ])}
           scrollEventThrottle={16}
         >
-          {articles.map((_, i) => (
-            <ArticleCard article={_} key={i} />
+          {articles.map((a, i) => (
+            <ArticleCard
+              key={i}
+              article={a}
+              favorites={favorites}
+              handleAddFavorite={this.handleAddFavorite}
+              handleRemoveFavorite={this.handleRemoveFavorite}
+            />
           ))}
         </ScrollView>
       </View>
@@ -216,7 +281,13 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginTop: 16
-  }
+  },
+
+  textUnderline: {
+    fontSize: 16,
+    textAlign: "center",
+    textDecorationLine: "underline"
+  },
 });
 
 export default withFirebaseHOC(Home);
