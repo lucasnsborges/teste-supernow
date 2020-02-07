@@ -9,15 +9,12 @@ class Initial extends Component {
 
   componentDidMount = async () => {
     try {
-      // previously
       this.loadLocalAsync();
 
       await this.props.firebase.checkUserAuth(user => {
         if (user) {
-          //console.log(user);
           this.props.navigation.navigate("App");
         } else {
-          //console.log("signup");
           this.props.navigation.navigate("Auth");
         }
       });
@@ -27,22 +24,10 @@ class Initial extends Component {
   };
 
   loadLocalAsync = async () => {
-    // return await Promise.all([
-    //   Asset.loadAsync([
-    //     require("../assets/flame.png"),
-    //     require("../assets/icon.png")
-    //   ]),
-    //   Font.loadAsync({
-    //     ...Icon.Ionicons.font
-    //   })
-    // ]);
-
     return true;
   };
 
   handleLoadingError = error => {
-    // In this case, you might want to report the error to your error
-    // reporting service, for example Sentry
     console.warn(error);
   };
 
