@@ -1,4 +1,4 @@
-## Supermercado Now App Teste
+## Teste Supermercado Now
 <br />
 
 # Desenvolva um aplicativo com as seguintes características
