@@ -1,4 +1,4 @@
-## Teste Supermercado Now
+## Teste Supernow
 <br />
 
 # Desenvolva um aplicativo com as seguintes características
@@ -18,11 +18,11 @@
 
 - Clone o repositório em sua máquina
     ```bash
-      git clone https://github.com/lucasnsborges/testesupnow.git
+      git clone https://github.com/lucasnsborges/testesupernow.git
     ```
 - Execute os seguintes comandos para rodar o projeto
     ```bash
-      cd testesupnow
+      cd testesupernow
       yarn install 
       yarn start   
     ```
