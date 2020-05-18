@@ -18,11 +18,11 @@
 
 - Clone o repositório em sua máquina
     ```bash
-      git clone https://github.com/lucasnsborges/testesupernow.git
+      git clone https://github.com/lucasnsborges/teste-supernow.git
     ```
 - Execute os seguintes comandos para rodar o projeto
     ```bash
-      cd testesupernow
+      cd teste-supernow
       yarn install 
       yarn start   
     ```
